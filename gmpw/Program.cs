@@ -81,11 +81,13 @@ namespace gmpw
         {
             bool shouldAvoidAmbiguous = true;
             if (Boolean.TryParse(options.AvoidAmbiguous, out shouldAvoidAmbiguous))
+            {
                 if (shouldAvoidAmbiguous)
                 {
                     Regex ambiguous = new Regex("[oO0l1]+");
                     return ambiguous.IsMatch(String.Format("{0}", letter));
                 }
+            }
             else
                 ThrowInvalidOptionArgument(Options.commandOptionAvoidAmbiguous, options.AvoidAmbiguous);
             
