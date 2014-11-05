@@ -24,6 +24,7 @@ namespace gmpw
         public const String commandOptionDigit = "digit";
         public const String commandOptionUpper = "upper";
         public const String commandOptionLower = "lower";
+        public const String commandOptionSymbol = "symbol";
         public const String commandOptionAvoidAmbiguous = "avoid-ambiguous";
 
         [Option('n', commandOptionLength, Required = true, HelpText = "Length of password, must between 3-20")]
@@ -38,6 +39,9 @@ namespace gmpw
         [Option('l', commandOptionLower, Required = false, DefaultValue = -1, HelpText = "Number of lower case letters")]
         public int NumberOfLower { get; set; }
 
+        [Option('s', commandOptionSymbol, Required = false, DefaultValue = 0, HelpText = "Number of symbol letters")]
+        public int NumberOfSymbol { get; set; }
+
         [Option('a', commandOptionAvoidAmbiguous, Required = false, DefaultValue = "true", HelpText = "Avoid chars \'oO0l1\'")]
         public String AvoidAmbiguous { get; set; }
 
@@ -48,7 +52,7 @@ namespace gmpw
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(asm.Location);
             var help = new HelpText {
                 Heading = new HeadingInfo(fvi.ProductName, String.Format("{0}.{1}", fvi.ProductMajorPart, fvi.ProductMinorPart)),
-                Copyright = new CopyrightInfo(fvi.CompanyName, 2013),
+                Copyright = new CopyrightInfo(fvi.CompanyName, 2014),
                 AdditionalNewLineAfterOption = true,
                 AddDashesToOption = true
             };
@@ -105,6 +109,7 @@ namespace gmpw
             dulList.Add(new KeyValuePair<int, String>(options.NumberOfDigit, Options.commandOptionDigit));
             dulList.Add(new KeyValuePair<int, String>(options.NumberOfUpper, Options.commandOptionUpper));
             dulList.Add(new KeyValuePair<int, String>(options.NumberOfLower, Options.commandOptionLower));
+            dulList.Add(new KeyValuePair<int, String>(options.NumberOfSymbol, Options.commandOptionSymbol));
             dulList.Sort((x, y) => y.Key - x.Key);
 
             Dictionary<String, int> dulMap = new Dictionary<String, int>();
@@ -149,17 +154,19 @@ namespace gmpw
                 );
 
 
-            String pwInfo = String.Format("numbers : {0}\nlower letters: {1}\nupper letters: {2}", 
+            String pwInfo = String.Format("numbers : {0}\nlower letters: {1}\nupper letters: {2}\nsymbol letters: {3}\n", 
                                                         dulMap[Options.commandOptionDigit],
                                                         dulMap[Options.commandOptionLower],
-                                                        dulMap[Options.commandOptionUpper]);
+                                                        dulMap[Options.commandOptionUpper],
+                                                        dulMap[Options.commandOptionSymbol]);
 
             StringBuilder pwBuilder = new StringBuilder();
             while (dulMap[Options.commandOptionDigit] > 0 || 
                         dulMap[Options.commandOptionUpper] > 0 || 
-                        dulMap[Options.commandOptionLower] > 0)
+                        dulMap[Options.commandOptionLower] > 0 ||
+                        dulMap[Options.commandOptionSymbol] > 0)
             {
-                int picker = rand.Next(3);
+                int picker = rand.Next(4);
                 switch (picker)
                 {
                     case 0:
@@ -193,6 +200,14 @@ namespace gmpw
                                 pwBuilder.Append(c);
                                 -- dulMap[Options.commandOptionUpper];
                             }
+                        }
+                        break;
+                    case 3:
+                        if (dulMap[Options.commandOptionSymbol] > 0)
+                        {
+                            String symbols = "`~!@#$%^&*()_+-=[]{}\\|';\":/.,?><";
+                            pwBuilder.Append(symbols.ElementAt(rand.Next(symbols.Length)));
+                            -- dulMap[Options.commandOptionSymbol];
                         }
                         break;
                     default:
